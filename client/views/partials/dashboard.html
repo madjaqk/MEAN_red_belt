@@ -1,0 +1,18 @@
+<div>
+	<h3>Hello, {{ pollCtrl.user.name }}</h3>
+	<a href="#/new">Create a new poll!</a>
+	<table>
+		<tr><th>Name</th>
+			<th>Question</th>
+			<th>Date Posted</th>
+			<th>Action</th>
+		</tr>
+		<tr ng-repeat="poll in pollCtrl.polls">
+			<td>{{ poll._asker.name }}</td>
+			<td><a href="#/{{poll._id}}">{{ poll.question }}</a></td>
+			<td>{{ poll.createdAt | date : "MMM d, yyyy" }}</td>
+			<td><a href="#" ng-show="pollCtrl.user._id==poll._asker._id" ng-click="pollCtrl.delete(poll._id)">Delete</a></td>
+		</tr>
+	</table>
+	
+</div>

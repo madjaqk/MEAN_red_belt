@@ -1,0 +1,14 @@
+<div>
+	<h3>{{ one_pollCtrl.current_question.question }}</h3>
+	<table>
+		<tr>
+			<th>Option</th>
+			<th>Current Count of Votes</th>
+			<th>Action</th>
+		</tr>
+		<tr ng-repeat="(index, option) in one_pollCtrl.current_question.options">
+			<td>{{option.option}}</td>
+			<td>{{option.votes}}</td>
+			<td><a href="#" ng-click="one_pollCtrl.vote(index)">Vote</a></td>
+	</table>
+</div>

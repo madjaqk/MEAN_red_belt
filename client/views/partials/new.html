@@ -1,0 +1,8 @@
+<div>
+	<h3>Put the question and options here:</h3>
+	<form>
+		<p>Question: <input type="text" ng-model="pollCtrl.new_question.question"></p>
+		<p ng-repeat="i in [0,1,2,3]">Option {{i+1}}: <input type="text" ng-model="pollCtrl.new_question.options[i].option"></p>
+		<input type="submit" value="Create Poll" ng-click="pollCtrl.createQuestion()">
+	</form>
+</div>

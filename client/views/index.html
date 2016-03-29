@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title></title>
+		<script src="angular/angular.js"></script>
+		<script src="angular-route/angular-route.js"></script>
+		<script src="ngstorage/ngStorage.js"></script>
+		<script type="text/javascript">
+			var myApp = angular.module("myApp", ["ngRoute", "ngStorage"])
+
+			myApp.config(function($routeProvider){
+				$routeProvider
+					.when("/dashboard", {
+						templateUrl: "partials/dashboard.html",
+					})
+					.when("/login", {
+						templateUrl: "partials/login.html",
+					})
+					.when("/new", {
+						templateUrl: "partials/new.html"
+					})
+					.when("/:id", {
+						templateUrl: "partials/show.html",
+						controller: "one_pollController",
+						controllerAs: "one_pollCtrl"
+					})
+					.otherwise({
+						redirectTo: "/login",
+					})
+			})
+
+			myApp.factory("userFactory", function($http){
+				var factory = {}
+
+					// factory.index = function(callback){
+					// 	$http.get("/users/index")
+					// 		.then(function(output){
+					// 			var users = output
+					// 			callback(users)
+					// 		})
+					// }
+
+					factory.create = function(name, callback){
+						$http.post("/users", {name: name})
+							.then(function(output){
+								var user = output
+								callback(output)
+							})
+					}
+
+				return factory
+			})
+
+			myApp.factory("pollFactory", function($http){
+				var factory = {}
+
+				factory.index = function(callback){
+					$http.get("/polls/index")
+						.then(function(output){
+							var polls = output
+							callback(polls)
+						})
+				}
+
+				factory.create = function(new_question, callback){
+					$http.post("/polls", new_question)
+						.then(function(output){
+							if(output.error){
+								// more error checking here
+							}
+							callback()
+						})
+				}
+
+				factory.show = function(id, callback){
+					$http.get("/polls/"+id)
+						.then(function(output){
+							var question = output
+							callback(question)
+						})
+				}
+
+				factory.update = function(id, choice, callback){
+					$http.patch("/polls/"+id, {choice: choice})
+						.then(function(output){
+							var question = output
+							callback(output)
+						})
+				}
+
+				factory.destroy = function(id, callback){
+					$http.delete("/polls/"+id)
+						.then(function(output){
+							callback(output)
+						})
+				}
+
+				return factory
+			})
+
+			myApp.controller("pollController", function($location, $sessionStorage, userFactory, pollFactory){
+
+				var _this = this
+
+				function getPolls(){
+					pollFactory.index(function(data){
+						_this.polls = data.data
+					})
+				}
+
+				getPolls()
+
+				if(!$sessionStorage.user){
+					$location.url("/login")
+				} else {
+					_this.user = $sessionStorage.user
+				}
+
+				_this.login = function(){
+					userFactory.create(_this.name, function(data){
+						$sessionStorage.user = data.data
+						_this.user = $sessionStorage.user
+						$location.url("/dashboard")
+					})
+				}
+
+				_this.logOut = function(){
+					delete $sessionStorage.user
+					_this.user = {}
+					$location.url("/login")
+				}
+
+				_this.createQuestion = function(){
+					_this.new_question._asker = _this.user._id
+					_this.new_question.options = Object.keys(_this.new_question.options).map(function(k) {return _this.new_question.options[k]})
+					pollFactory.create(_this.new_question, function(data){
+						_this.new_question = {}
+						getPolls()
+						$location.url("/dashboard")
+					})
+				}
+
+				_this.delete = function(id){
+					pollFactory.destroy(id, function(data){
+						getPolls()
+						$location.url("/dashboard")
+					})
+				}
+			})
+
+			myApp.controller("one_pollController", function($routeParams, $location, pollFactory){
+
+				_this = this
+
+				pollFactory.show($routeParams.id, function(output){
+					_this.current_question = output.data
+				})
+
+				_this.vote = function(choice){
+					pollFactory.update($routeParams.id, choice, function(output){
+						_this.current_question = output.data
+					})
+				}
+			})
+
+		</script>
+	</head>
+	<body ng-app="myApp" ng-controller="pollController as pollCtrl">
+		<button ng-click="pollCtrl.logOut()" ng-show="pollCtrl.user.name">Log out</button>
+		<div ng-view="">
+		</div>
+	</body>
+</html>

@@ -1,0 +1,15 @@
+<div>
+	<h3>Hello, {{ user.name }}</h3>
+	<button ng-click="increment()">Click</button>
+	<p>{{ counter }} clicks</p>
+	<table>
+		<tr><th>Name</th>
+			<th>Created At</th>
+		</tr>
+		<tr ng-repeat="user in users">
+			<td>{{ user.name }}</td>
+			<td>{{ user.createdAt }}</td>
+		</tr>
+	</table>
+	<button ng-click="logOut()">Log out</button>
+</div>
