@@ -16,22 +16,36 @@ module.exports = (function(){
 			})
 		},
 		create: function(req, res){
-			User.findOneAndUpdate({name: req.body.name}, {name: req.body.name}, {upsert: true, new: true}, function(err, results){
+			User.findOne({name: req.body.name}, function(err, results){
 				if(err){
 					console.log("users.create findOneAndUpdate error", err)
 					res.json(err)
 					return
-				}
-			})
-			User.findOne({name: req.body.name}, function(err, results){
-				if(err){
-					console.log("users.create findOne error", err)
-					res.json(err)
-					return
 				} else {
-					res.json(results)
+					if(results){
+						res.json(results)
+					} else {
+						guy = new User({name: req.body.name})
+						guy.save(function(err){
+							if(err){
+								console.log("new user save error", err)
+								res.json(err)
+							} else {
+								res.json(guy)
+							}
+						})
+					}
 				}
 			})
+			// User.findOne({name: req.body.name}, function(err, results){
+			// 	if(err){
+			// 		console.log("users.create findOne error", err)
+			// 		res.json(err)
+			// 		return
+			// 	} else {
+			// 		res.json(results)
+			// 	}
+			// })
 		}
 	}
 })()

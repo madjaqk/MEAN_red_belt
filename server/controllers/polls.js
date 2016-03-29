@@ -32,15 +32,14 @@ module.exports = (function(){
 			question.save(function(err){
 				if(err){
 					console.log("polls.create error", err)
-					res.json(err)
+					res.json({status: "error", error: err})
 				} else {
-					res.json({})
+					res.json({status: "OK"})
 				}
 			})
 		},
 
 		update: function(req, res){
-			console.log("polls.update function")
 			Poll.findOne({_id: req.params.id})
 				.then(function(poll){
 					poll.options[req.body.choice].votes++
@@ -49,7 +48,6 @@ module.exports = (function(){
 							console.log("polls.update error", err)
 							res.json(err)
 						} else {
-							console.log("poll", poll)
 							res.json(poll)
 						}
 					})

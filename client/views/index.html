@@ -65,10 +65,7 @@
 				factory.create = function(new_question, callback){
 					$http.post("/polls", new_question)
 						.then(function(output){
-							if(output.error){
-								// more error checking here
-							}
-							callback()
+							callback(output)
 						})
 				}
 
@@ -118,9 +115,13 @@
 
 				_this.login = function(){
 					userFactory.create(_this.name, function(data){
-						$sessionStorage.user = data.data
-						_this.user = $sessionStorage.user
-						$location.url("/dashboard")
+						if(data.data.name=="ValidationError"){
+							alert(data.data.message)
+						} else {
+							$sessionStorage.user = data.data
+							_this.user = $sessionStorage.user
+							$location.url("/dashboard")
+						}
 					})
 				}
 
@@ -131,13 +132,23 @@
 				}
 
 				_this.createQuestion = function(){
-					_this.new_question._asker = _this.user._id
-					_this.new_question.options = Object.keys(_this.new_question.options).map(function(k) {return _this.new_question.options[k]})
-					pollFactory.create(_this.new_question, function(data){
-						_this.new_question = {}
-						getPolls()
-						$location.url("/dashboard")
-					})
+					if(!_this.new_question){
+						alert("You didn't enter anything")
+					} else if(!_this.new_question.options){
+						alert("You didn't enter any options")
+					} else {
+						_this.new_question._asker = _this.user._id
+						_this.new_question.options = Object.keys(_this.new_question.options).map(function(k) {return _this.new_question.options[k]})
+						pollFactory.create(_this.new_question, function(data){
+								if(data.data.status=="error"){
+									alert("Errors!  Is your question at least 8 characters long and all four options at least three characters long?")
+								} else {
+									_this.new_question = {}
+									getPolls()
+									$location.url("/dashboard")
+								}
+						})
+					}
 				}
 
 				_this.delete = function(id){
@@ -158,7 +169,8 @@
 
 				_this.vote = function(choice){
 					pollFactory.update($routeParams.id, choice, function(output){
-						_this.current_question = output.data
+						// _this.current_question = output.data
+						$location.url("/"+output.data._id)
 					})
 				}
 			})
